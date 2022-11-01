@@ -194,7 +194,7 @@ void handleKeyInput(GLFWwindow *win, int key, int scancode, int action, int mods
 		break;
 	}
 
-	//Move around with the w,a,s,d keys
+	//Move around with the arrow keys
 	if(key == GLFW_KEY_UP && action == GLFW_PRESS)
 		changeY = MOVE_SPEED;
 	else if(key == GLFW_KEY_DOWN && action == GLFW_PRESS)
