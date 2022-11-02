@@ -2,7 +2,9 @@
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
 #include <stdio.h>
+#include <sys/time.h>
 
+#define PROGRAM_SPEED 100.0f
 #define MAX_SHADER_SIZE 8192
 
 enum
@@ -242,10 +244,18 @@ int main(void)
 	maxLoc = glGetUniformLocation(program, "uMax");
 	approximationMethodLoc = glGetUniformLocation(program, "uApproximationMethod");
 	centerLoc = glGetUniformLocation(program, "uCenter");
+    
+	int winW, winH;
+	glfwGetWindowSize(win, &winW, &winH);
+	glUniform2f(winSizeLoc, (float)winW, (float)winH);
 
+	double seconds = 1.0;
 	//Main loop
 	while(!glfwWindowShouldClose(win))
 	{
+		struct timeval begin;
+		gettimeofday(&begin, 0);
+
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -258,15 +268,15 @@ int main(void)
 		glUniform1f(program, (float)interval);
 
 		if(interval >= MIN_INTERVAL)
-			interval += intervalChange;
+			interval += intervalChange * seconds * PROGRAM_SPEED;
 		else if(interval < MIN_INTERVAL)
-			interval = 0.01f;
+			interval = 0.01f * seconds * PROGRAM_SPEED;
 
-		minVal += minValChange;
-		maxVal += maxValChange;
+		minVal += minValChange * seconds * PROGRAM_SPEED;
+		maxVal += maxValChange * seconds * PROGRAM_SPEED;
 
-		centerX += changeX / scale;
-		centerY += changeY / scale;
+		centerX += changeX / scale * seconds * PROGRAM_SPEED;
+		centerY += changeY / scale * seconds * PROGRAM_SPEED;
 		glUniform2f(centerLoc, centerX, centerY);
 		
 		if(maxVal < minVal + 1.0f)
@@ -280,6 +290,11 @@ int main(void)
 
 		glfwSwapBuffers(win);
 		glfwPollEvents();
+
+		struct timeval end;
+		gettimeofday(&end, 0);
+
+		seconds = end.tv_sec - begin.tv_sec + 1e-6 * (end.tv_usec - begin.tv_usec);
 	}
 
 	glfwTerminate();
